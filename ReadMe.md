@@ -10,43 +10,21 @@ This repository contains Docker projects and tools specifically designed for Pix
 ### Project Structure
 ```
 pixel10_Tools/
-├── cinnamon_Pixel10
-```
+# Pixel 10 - Docker Projects & Tools
 
-## Getting Started
+This repository contains Docker projects and tools intended for Pixel 10 development and testing. The main subproject provides a Cinnamon desktop container with SSH, VNC and noVNC access.
 
-### 1. Clone the Repository
-```bash
-git clone <repository-url>
-cd pixel10_Tools
-```
+## Prerequisites
 
-### 2. Build Docker Images
-```bash
-docker-compose build
-```
+- Docker (with Docker Compose)
+- Basic knowledge of Docker and Linux
 
-### 3. Start Services
-```bash
-docker-compose up -d
-```
+## Repository structure
 
-### 4. Stop Services
-```bash
-````markdown
-# Pixel 10 - Docker Projekte & Tools
-
-## Übersicht
-Dieses Repository enthält Docker-Projekte und Hilfsdateien für die Pixel 10 Umgebung. Das wichtigste Projekt ist ein Cinnamon-Desktop-Container mit SSH-, VNC- und noVNC-Zugriff.
-
-## Voraussetzungen
-- Docker (inkl. Docker Compose)
-- Grundkenntnisse in Docker und Linux
-
-## Projektstruktur
 ```
 pixel10_Tools/
-├── cinnamon_Pixel10/
+├── ReadMe.md                # This file
+└── cinnamon_Pixel10/        # Cinnamon desktop container project
 	├── Dockerfile
 	├── docker-compose.yml
 	├── .env
@@ -54,42 +32,66 @@ pixel10_Tools/
 	└── supervisord.conf
 ```
 
-## Schnellstart
+## Quick start
 
-1. Repository klonen
+1. Clone the repository:
 
 ```bash
 git clone <repository-url>
 cd pixel10_Tools
 ```
 
-2. In das Projektverzeichnis des Cinnamon-Containers wechseln
+2. Change to the Cinnamon project directory:
 
 ```bash
 cd cinnamon_Pixel10
 ```
 
-3. `.env` anpassen (Pflicht — Passwörter setzen)
+3. Create or edit the `.env` file (required). Example:
 
-```bash
-# Beispiel: .env bearbeiten
-nano .env
+```env
+USER=docker
+PASSWORD=secure_password_here
+VNC_PASSWORD=another_secure_pw
 ```
 
-4. Image bauen und Container starten
+4. Build and start the container:
 
 ```bash
 docker compose up -d --build
 ```
 
-5. Container stoppen
+5. Follow logs:
+
+```bash
+docker compose logs -f
+```
+
+6. Stop and remove containers:
 
 ```bash
 docker compose down
 ```
 
-## Hinweise
-- Achte darauf, die Datei `.env` nicht in öffentliche Repositories zu pushen (in `.gitignore` eingetragen).
-- Standardports: SSH 2222, VNC 5901, noVNC 6080 (kann in `docker-compose.yml` geändert werden).
+## Default ports
 
-````
+- 2222 → SSH (container port 22)
+- 5901 → VNC
+- 6080 → noVNC (web)
+
+## Security notes
+
+- Do not commit `.env` to version control.
+- For production, use SSH key authentication and disable root password login.
+- Restrict network access with a firewall and allow only trusted IPs.
+
+## Support and troubleshooting
+
+- If VNC doesn't start, check `/var/log/supervisor/vncserver.log` inside the container.
+- If noVNC is unreachable, check the `novnc` process with `supervisorctl status`.
+- If Docker Compose commands differ, try `docker-compose` instead of `docker compose` depending on your environment.
+
+## License & contribution
+
+Contributions and improvements are welcome. Please open issues or pull requests on the repository.
+    ├── startup.sh

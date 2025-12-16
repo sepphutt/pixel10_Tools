@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# Docker installation script for Debian
-# Checks and installs all required dependencies
+# Docker installation script for Debian-based systems
+# Checks and installs all required dependencies and Docker Engine
 
 set -e
 
-# Farben für Output
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}=== Docker installation for Debian ===${NC}\n"
+echo -e "${GREEN}=== Docker installation for Debian/Ubuntu ===${NC}\n"
 
-# Root-Rechte prüfen
+# Check for root privileges
 if [ "$EUID" -ne 0 ]; then 
     echo -e "${RED}Please run as root (sudo ./build-docker.sh)${NC}"
     exit 1
@@ -68,7 +68,7 @@ if [ ${#PACKAGES_TO_INSTALL[@]} -gt 0 ]; then
     apt-get install -y "${PACKAGES_TO_INSTALL[@]}"
     echo -e "${GREEN}✓ All base dependencies installed${NC}\n"
 else
-    echo -e "${GREEN}✓ Alle Basis-Abhängigkeiten bereits vorhanden${NC}\n"
+    echo -e "${GREEN}✓ All base dependencies already installed${NC}\n"
 fi
 
 echo "=== Check Docker installation ==="
@@ -139,7 +139,7 @@ else
     echo -e "${YELLOW}⚠ Docker test failed${NC}\n"
 fi
 
-# User zur docker-Gruppe hinzufügen
+# Add sudo user to docker group
 if [ -n "$SUDO_USER" ]; then
     echo "=== Add user '$SUDO_USER' to docker group ==="
     usermod -aG docker "$SUDO_USER"
