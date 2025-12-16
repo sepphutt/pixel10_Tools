@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.log
+*.tmp
+*.swp
+.vscode/
+.DS_Store
+node_modules/
+*.crt
+*.key

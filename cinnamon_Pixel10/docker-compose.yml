@@ -1,0 +1,32 @@
+#Linux Cinnamon Desktop Environment with VNC and SSH access
+
+services:
+  cinnamon-desktop:
+    build: .
+    container_name: cinnamon-vnc-ssh
+    env_file: .env
+    ports:
+      #- "2222:22"      # SSH
+      #- "5901:5901"    # VNC
+      - "6080:6080"    # noVNC
+    volumes:
+      - /mnt/shared:/mnt/shared
+    environment:
+      - USER
+      - PASSWORD
+      - VNC_PASSWORD
+    hostname: cinnamon-desktop
+    restart: unless-stopped
+    shm_size: '4gb'
+    stdin_open: true
+    tty: true
+    # Performance optimizations
+    ipc: host
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+        reservations:
+          cpus: '2'
+          memory: 4G
