@@ -11,13 +11,13 @@ This repository contains Docker projects and tools specifically designed for Pix
 ```
 pixel10_Tools/
 # Pixel 10 - Docker Projects & Tools
-
-This repository contains Docker projects and tools intended for Pixel 10 development and testing. The main subproject provides a Cinnamon desktop container with SSH, VNC and noVNC access.
+```
+This repository contains Docker projects and tools intended for Pixel 10 development and testing. 
 
 ## Prerequisites
 
-- Docker (with Docker Compose)
-- Basic knowledge of Docker and Linux
+- Run build-docker.sh with sudo
+
 
 ## Repository structure
 
@@ -94,4 +94,3 @@ docker compose down
 ## License & contribution
 
 Contributions and improvements are welcome. Please open issues or pull requests on the repository.
-    ├── startup.sh
