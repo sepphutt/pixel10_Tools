@@ -39,7 +39,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 # Install SSH server
 RUN apt-get update && apt-get install -y openssh-server && \
-    mkdir /var/run/sshd && \
+    mkdir -p /var/run/sshd && \
     echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
