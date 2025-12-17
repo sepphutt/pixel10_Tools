@@ -1,23 +1,12 @@
 # Pixel 10 - Docker Projects & Tools
 
-## Overview
-This repository contains Docker projects and tools specifically designed for Pixel 10 development and deployment.
-
-## Prerequisites
-- Docker Compose (included with Docker)
-- Basic knowledge of containerization
-
-### Project Structure
-```
-pixel10_Tools/
-# Pixel 10 - Docker Projects & Tools
-```
-This repository contains Docker projects and tools intended for Pixel 10 development and testing. 
+This repository contains Docker projects and tools intended for Pixel 10 development and testing. The main subproject provides a Cinnamon desktop container with SSH, VNC and noVNC access.
 
 ## Prerequisites
 
-- Run build-docker.sh with sudo
-
+- Docker Desktop (includes Docker Compose)
+- Basic knowledge of Docker and Linux
+- On Linux hosts, you can use the helper script `cinnamon_Pixel10/docker_install.sh` to install Docker.
 
 ## Repository structure
 
@@ -29,7 +18,10 @@ pixel10_Tools/
 	├── docker-compose.yml
 	├── .env
 	├── startup.sh
-	└── supervisord.conf
+	├── supervisord.conf
+	└── docker_builds/
+		├── docker_export.sh
+		└── docker_import.sh
 ```
 
 ## Quick start
@@ -73,11 +65,36 @@ docker compose logs -f
 docker compose down
 ```
 
-## Default ports
+## Ports
 
-- 2222 → SSH (container port 22)
-- 5901 → VNC
 - 6080 → noVNC (web)
+- 2222 → SSH (container port 22) — commented by default in `docker-compose.yml`
+- 5901 → VNC — commented by default in `docker-compose.yml`
+
+Enable SSH and VNC by uncommenting the lines under `services.cinnamon-desktop.ports` in `docker-compose.yml`.
+
+## Export / Import containers (optional)
+
+Use the helper scripts to export running containers and import them later:
+
+Export all running containers as `.tar.gz` into `cinnamon_Pixel10/docker_builds/docker_exports`:
+
+```bash
+cd cinnamon_Pixel10/docker_builds
+bash docker_export.sh
+```
+
+Import all archives from `docker_builds/docker_exports` as images:
+
+```bash
+cd cinnamon_Pixel10/docker_builds
+bash docker_import.sh
+```
+
+Notes:
+- The export script only exports currently running containers.
+- Archives are created as `<container-name>.tar.gz`.
+- After import, images are tagged from the archive filename.
 
 ## Security notes
 

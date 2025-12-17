@@ -24,6 +24,9 @@ if [ -n "$USER" ] && [ -n "$VNC_PASSWORD" ]; then
     echo "VNC password set for: $USER"
 fi
 
+# CleanUp Update
+apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Start D-Bus
 service dbus start
 

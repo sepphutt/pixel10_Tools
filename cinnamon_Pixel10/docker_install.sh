@@ -16,7 +16,7 @@ echo -e "${GREEN}=== Docker installation for Debian/Ubuntu ===${NC}\n"
 
 # Check for root privileges
 if [ "$EUID" -ne 0 ]; then 
-    echo -e "${RED}Please run as root (sudo ./install-docker.sh)${NC}"
+    echo -e "${RED}Please run as root (sudo ./docker_install.sh)${NC}"
     exit 1
 fi
 

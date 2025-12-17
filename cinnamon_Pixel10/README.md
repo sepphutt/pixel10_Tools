@@ -76,3 +76,26 @@ The example configuration uses `docker`/`docker` by default. Change these values
 
 - `docker compose` (v2) is used in the instructions. On some systems the command is `docker-compose`.
 - The container uses `shm_size` configured in `docker-compose.yml` for better GUI performance.
+
+## Export / Import (optional)
+
+You can export running containers to archives and import them later.
+
+Export all running containers as `.tar.gz` into `docker_builds/docker_exports`:
+
+```bash
+cd docker_builds
+bash docker_export.sh
+```
+
+Import all archives from `docker_builds/docker_exports` as images:
+
+```bash
+cd docker_builds
+bash docker_import.sh
+```
+
+Notes:
+- The export script only exports currently running containers.
+- Archives are created as `<container-name>.tar.gz` under `docker_builds/docker_exports`.
+- After import, images are tagged from the archive filename.
