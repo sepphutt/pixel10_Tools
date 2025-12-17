@@ -5,7 +5,6 @@ ENV USER=docker
 
 # Install utilities
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    software-properties-common \
     sudo \
     wget \
     curl \
@@ -22,7 +21,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     pavucontrol \
     mesa-utils \
     libgl1-mesa-dri \
-    libgl1-mesa-glx \
+    libgl1 \
     x11-apps \
     x11-xserver-utils \
     fonts-noto \
