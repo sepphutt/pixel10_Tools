@@ -22,6 +22,11 @@ services:
     tty: true
     # Performance optimizations
     ipc: host
+    # Security capabilities for Firefox and other apps
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
     deploy:
       resources:
         limits:
