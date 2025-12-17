@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Docker installation script for Debian-based systems
-# Checks and installs all required dependencies and Docker Engine
+# Docker installation script for Debian/Ubuntu
+# Installs all required dependencies and Docker Engine
+# Version: 1.0.0
 
 set -e
 
@@ -15,7 +16,7 @@ echo -e "${GREEN}=== Docker installation for Debian/Ubuntu ===${NC}\n"
 
 # Check for root privileges
 if [ "$EUID" -ne 0 ]; then 
-    echo -e "${RED}Please run as root (sudo ./build-docker.sh)${NC}"
+    echo -e "${RED}Please run as root (sudo ./install-docker.sh)${NC}"
     exit 1
 fi
 
@@ -71,29 +72,13 @@ else
     echo -e "${GREEN}✓ All base dependencies already installed${NC}\n"
 fi
 
-echo "=== Check Docker installation ==="
-if check_command "docker"; then
-    DOCKER_VERSION=$(docker --version)
-    echo -e "${GREEN}Docker is already installed: $DOCKER_VERSION${NC}"
-    read -p "Do you want to reinstall/update Docker? (y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Installation cancelled."
-        exit 0
-    fi
-    echo "Removing old Docker versions..."
-    apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
-fi
-
-echo -e "\n=== Remove old Docker versions (if any) ==="
+echo "=== Remove old Docker versions (if any) ==="
 apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
 echo -e "${GREEN}✓ Old versions removed${NC}\n"
 
 echo "=== Add Docker GPG key ==="
 install -m 0755 -d /etc/apt/keyrings
-if [ -f /etc/apt/keyrings/docker.gpg ]; then
-    rm /etc/apt/keyrings/docker.gpg
-fi
+rm -f /etc/apt/keyrings/docker.gpg
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
 echo -e "${GREEN}✓ GPG key added${NC}\n"
@@ -123,15 +108,9 @@ systemctl enable docker
 echo -e "${GREEN}✓ Docker service started and enabled${NC}\n"
 
 echo "=== Verify Docker installation ==="
-if docker --version; then
-    echo -e "${GREEN}✓ Docker installed successfully${NC}"
-fi
+docker --version && echo -e "${GREEN}✓ Docker installed successfully${NC}"
+docker compose version && echo -e "${GREEN}✓ Docker Compose installed successfully${NC}"
 
-if docker compose version; then
-    echo -e "${GREEN}✓ Docker Compose installed successfully${NC}"
-fi
-
-# Docker Test
 echo -e "\n=== Test Docker with hello-world ==="
 if docker run --rm hello-world > /dev/null 2>&1; then
     echo -e "${GREEN}✓ Docker is working correctly${NC}\n"
@@ -151,4 +130,4 @@ echo -e "${GREEN}=== Installation completed! ===${NC}\n"
 echo "Docker Version: $(docker --version)"
 echo "Docker Compose Version: $(docker compose version)"
 echo ""
-echo "You can now start the container with 'docker compose up -d --build'"
+echo "You can now start containers with 'docker compose up -d --build'"
