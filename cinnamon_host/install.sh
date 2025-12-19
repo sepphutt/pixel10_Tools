@@ -14,10 +14,6 @@ KEYBOARD_VARIANT=""
 USER_NAME="$(whoami)"
 ARCH="$(dpkg --print-architecture)"
 
-if [[ "$ARCH" != "arm64" && "$ARCH" != "aarch64" ]]; then
-  echo "Warnung: Dieses Skript ist für arm64/aarch64 gedacht. Gefundene Architektur: $ARCH"
-fi
-
 echo "Installiere für User: $USER_NAME (Arch: $ARCH)"
 
 sudo timedatectl set-ntp true
@@ -77,8 +73,12 @@ sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 
 # VS Code installieren
 echo "Installiere Visual Studio Code..."
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null || true
-sudo sh -c "echo \"deb [arch=$(dpkg --print-architecture)] https://packages.microsoft.com/repos/code stable main\" > /etc/apt/sources.list.d/vscode.list"
+# Entferne alte/doppelte Einträge
+sudo rm -f /etc/apt/sources.list.d/vscode.list
+sudo rm -f /etc/apt/trusted.gpg.d/microsoft.gpg 2>/dev/null || true
+# Füge Repository hinzu
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-vscode.gpg > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft-vscode.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   code \
@@ -95,8 +95,10 @@ sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 
 # Microsoft Edge installieren
 echo "Installiere Microsoft Edge..."
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft-edge.gpg > /dev/null || true
-sudo sh -c "echo \"deb [arch=$(dpkg --print-architecture)] https://packages.microsoft.com/repos/edge stable main\" > /etc/apt/sources.list.d/microsoft-edge.list"
+
+# Füge Repository hinzu
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y microsoft-edge-stable || true
 sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
@@ -113,17 +115,47 @@ EOF"
 sudo dpkg-reconfigure -f noninteractive keyboard-configuration
 sudo setupcon || echo "setupcon konnte nicht ausgeführt werden (wird bei nächstem Login aktiv)"
 
-# websockify via pip
-sudo pip3 install --upgrade websockify
+# Locale und X11 Konfiguration für Keysym-Probleme
+echo "Konfiguriere Locale und X11..."
+sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y locales
+sudo sed -i '/de_AT.UTF-8/s/^# //g' /etc/locale.gen || true
+sudo sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen || true
+sudo locale-gen
+sudo update-locale LANG=de_AT.UTF-8 LC_ALL=de_AT.UTF-8
+
+# websockify via apt statt pip (vermeidet "externally managed environment" Fehler)
+# Debian/Ubuntu hat python3-websockify als Paket - das ist besser als pip in Debian 12+
+echo "Installiere websockify..."
+sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-websockify python3-numpy || true
+sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 
 # VNC Passwort für aktuellen User setzen
 sudo -u "$USER_NAME" bash -c "mkdir -p ~/.vnc && printf '%s\n%s\n\n' \"$DEFAULT_PASS\" \"$DEFAULT_PASS\" | vncpasswd"
+
+# .Xresources für bessere Keysym-Unterstützung
+sudo -u "$USER_NAME" bash -c 'cat > ~/.Xresources <<EOF
+Xft.dpi: 96
+Xft.antialias: true
+Xft.hinting: true
+Xft.rgba: rgb
+Xft.hintstyle: hintslight
+EOF'
 
 # xstartup für Cinnamon
 sudo -u "$USER_NAME" bash -c 'cat > ~/.vnc/xstartup <<EOF
 #!/bin/sh
 unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
+
+# X Resources laden
+test -r ~/.Xresources && xrdb -merge ~/.Xresources
+
+# Locale setzen
+export LANG=de_AT.UTF-8
+export LC_ALL=de_AT.UTF-8
+
 exec /usr/bin/cinnamon-session &>/dev/null
 EOF
 chmod +x ~/.vnc/xstartup'
@@ -179,8 +211,23 @@ WantedBy=multi-user.target
 EOF"
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now vncserver@"${USER_NAME}".service
-sudo systemctl enable --now novnc.service
+
+# Stoppe Services falls sie laufen (bei Re-Installation)
+sudo systemctl stop vncserver@"${USER_NAME}".service 2>/dev/null || true
+sudo systemctl stop novnc.service 2>/dev/null || true
+
+# Aktiviere und starte Services
+sudo systemctl enable vncserver@"${USER_NAME}".service
+sudo systemctl start vncserver@"${USER_NAME}".service
+
+# Warte kurz damit VNC Server bereit ist
+sleep 2
+
+sudo systemctl enable novnc.service
+sudo systemctl start novnc.service
+
+sudo apt autoremove -y
+sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
 
 # Status ausgeben
 echo ""
